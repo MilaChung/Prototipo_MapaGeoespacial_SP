@@ -5,7 +5,7 @@
  * inside a "case" expression must be wrapped in ["literal", [...]], or it
  * throws "Expression name must be a string, but found number instead."
  */
-const ACTIVE_COLOR = "#fbb03b";
+const ACTIVE_COLOR = "#f20acb";
 const INACTIVE_COLOR = "#3bb2d0";
 const WHITE = "#fff";
 
