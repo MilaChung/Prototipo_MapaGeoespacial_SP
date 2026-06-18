@@ -117,11 +117,14 @@ export function isRegionFeatureCollection(
 }
 
 export async function loadRegions(): Promise<RegionFeatureCollection> {
-  const response = await fetch("/regions.json");
+  // Captura o basePath configurado no next.config.ts dinamicamente
+  const basePath = process.env.__NEXT_ROUTER_BASEPATH || "";
+  
+  const response = await fetch(`${basePath}/regions.json`);
 
   if (!response.ok) {
     throw new Error(
-      `Falha ao carregar /regions.json: ${response.status} ${response.statusText}`
+      `Falha ao carregar ${basePath}/regions.json: ${response.status} ${response.statusText}`
     );
   }
 
