@@ -28,7 +28,7 @@ const AREA_FORMATTER = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 });
 
-const MAP_STYLE = process.env.NEXT_PUBLIC_MAP_STYLE;
+const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
 const DRAWN_FEATURE_COLOR = "#6366f1";
 
