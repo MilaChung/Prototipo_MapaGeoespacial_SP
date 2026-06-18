@@ -44,16 +44,6 @@ export default function Home() {
       });
   }, []);
 
-  useEffect(() => {
-    if (editRequestId === null) return;
-    setEditRequestId(null);
-  }, [editRequestId]);
-
-  useEffect(() => {
-    if (deleteRequestId === null) return;
-    setDeleteRequestId(null);
-  }, [deleteRequestId]);
-
   const handleSelect = (id: number | null) => {
     setSelectedId(id);
   };
@@ -64,12 +54,12 @@ export default function Home() {
 
   const handleEditDrawn = (id: string | number) => {
     setSelectedDrawnId(id);
-    setEditRequestId(id);
+    setEditRequestId(`${id}-${Date.now()}`);
   };
 
   const handleDeleteDrawn = (id: string | number) => {
     setSelectedDrawnId(id);
-    setDeleteRequestId(id);
+    setDeleteRequestId(`${id}-${Date.now()}`);
   };
 
   return (

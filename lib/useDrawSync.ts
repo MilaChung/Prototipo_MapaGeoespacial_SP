@@ -26,11 +26,24 @@ export function useDrawSync({ onFeaturesChange }: UseDrawSyncOptions) {
     const draw = drawRef.current;
     if (!draw) return;
 
+    const previousMode = draw.getMode();
+    const previousSelectedIds = draw.getSelectedIds();
+
     isUpdatingFromCode.current = true;
     draw.set({
       type: "FeatureCollection",
       features,
     });
+
+    const stillExistingIds = previousSelectedIds.filter((id) => draw.get(id));
+    if (stillExistingIds.length > 0) {
+      if (previousMode === "direct_select") {
+        draw.changeMode("direct_select", { featureId: String(stillExistingIds[0]) });
+      } else {
+        draw.changeMode("simple_select", { featureIds: stillExistingIds });
+      }
+    }
+
     setTimeout(() => {
       isUpdatingFromCode.current = false;
     }, 0);

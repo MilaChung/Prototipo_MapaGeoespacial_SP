@@ -266,12 +266,17 @@ export default function Map({
     [isEditMode, regions, onSelect]
   );
 
-  useEffect(() => {
+  const [previousIsEditMode, setPreviousIsEditMode] = useState(isEditMode);
+  if (previousIsEditMode !== isEditMode) {
+    setPreviousIsEditMode(isEditMode);
     if (!isEditMode) {
       setSelectedDrawnFeatureId(null);
       setIsConfirmingDelete(false);
-      return;
     }
+  }
+
+  useEffect(() => {
+    if (!isEditMode) return;
 
     onSelect(null);
     setHover(null);
@@ -331,37 +336,50 @@ export default function Map({
     const map = mapRef.current?.getMap();
     if (!draw || !map) return;
 
-    draw.changeMode("simple_select", { featureIds: [String(selectedDrawnId)] });
-    setSelectedDrawnFeatureId(selectedDrawnId);
-
+    const featureId = String(selectedDrawnId);
     const feature = drawnFeatures.find(
       (candidate) => candidate.id === selectedDrawnId
     );
+
+    if (!draw.get(featureId)) {
+      if (!feature) return;
+      draw.add(feature);
+    }
+
+    draw.changeMode("simple_select", { featureIds: [featureId] });
+    setSelectedDrawnFeatureId(selectedDrawnId);
+
     if (feature) {
       const bounds = getGeometriesBounds([feature.geometry]);
       if (bounds) map.fitBounds(bounds, { padding: 80 });
     }
-  }, [selectedDrawnId, selectedDrawnFeatureId, drawnFeatures]);
+  }, [selectedDrawnId, selectedDrawnFeatureId, drawnFeatures, drawRef]);
 
-  useEffect(() => {
-    if (editRequestId === null || editRequestId === undefined) return;
-    setIsSavingInfo(true);
-  }, [editRequestId]);
+  const [previousEditRequestId, setPreviousEditRequestId] = useState(editRequestId);
+  if (previousEditRequestId !== editRequestId) {
+    setPreviousEditRequestId(editRequestId);
+    if (editRequestId !== null && editRequestId !== undefined) {
+      setIsSavingInfo(true);
+    }
+  }
 
-  useEffect(() => {
-    if (deleteRequestId === null || deleteRequestId === undefined) return;
-    setIsConfirmingDelete(true);
-  }, [deleteRequestId]);
+  const [previousDeleteRequestId, setPreviousDeleteRequestId] = useState(deleteRequestId);
+  if (previousDeleteRequestId !== deleteRequestId) {
+    setPreviousDeleteRequestId(deleteRequestId);
+    if (deleteRequestId !== null && deleteRequestId !== undefined) {
+      setIsConfirmingDelete(true);
+    }
+  }
 
   const handleStartDraw = useCallback(() => {
     drawRef.current?.changeMode("draw_polygon");
     setIsDrawingPolygon(true);
-  }, []);
+  }, [drawRef]);
 
   const handleCancelDraw = useCallback(() => {
     drawRef.current?.changeMode("simple_select");
     setIsDrawingPolygon(false);
-  }, []);
+  }, [drawRef]);
 
   const handleToggleCoordinatePanel = useCallback(() => {
     setIsCoordinatePanelOpen((previous) => !previous);
@@ -412,7 +430,7 @@ export default function Map({
       featureId: String(selectedDrawnFeatureId),
     });
     setIsEditingVertices(true);
-  }, [selectedDrawnFeatureId]);
+  }, [selectedDrawnFeatureId, drawRef]);
 
   const handleRequestDelete = useCallback(() => {
     setIsConfirmingDelete(true);
@@ -424,13 +442,14 @@ export default function Map({
 
   const handleConfirmDelete = useCallback(() => {
     if (selectedDrawnFeatureId === null) return;
+    drawRef.current?.delete(String(selectedDrawnFeatureId));
     onDrawnFeaturesChange((previous) =>
       previous.filter((feature) => feature.id !== selectedDrawnFeatureId)
     );
     setSelectedDrawnFeatureId(null);
     setIsConfirmingDelete(false);
     setDrawToast("Polígono removido.");
-  }, [selectedDrawnFeatureId, onDrawnFeaturesChange]);
+  }, [selectedDrawnFeatureId, onDrawnFeaturesChange, drawRef]);
 
   const handleSaveInfo = useCallback(() => {
     setIsSavingInfo(true);
